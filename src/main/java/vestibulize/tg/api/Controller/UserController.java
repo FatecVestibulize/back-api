@@ -27,4 +27,16 @@ public class UserController {
         
         
     }
+
+    @PostMapping("/user/login")
+    public ResponseEntity<User> loginUser(@Valid @RequestBody User user) {
+        try{
+            User loggedUser = userService.authenticate(user);
+            return ResponseEntity.status(HttpStatus.OK).body(loggedUser);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new User());
+        }
+    }
+
 }

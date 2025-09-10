@@ -29,6 +29,8 @@ public class User {
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
     private LocalDateTime deleted_at;
+    @Transient
+    private String token;
 
     public User() {}
 
@@ -37,6 +39,12 @@ public class User {
         this.setEmail(email);
         this.setPassword(password);
         this.setBirth_date(birth_date);
+    }
+
+    public User(String token, String username, String email){
+        this.setToken(token);
+        this.setUsername(username);
+        this.setEmail(email);
     }
 
     public void setUsername(String username) {
@@ -94,7 +102,15 @@ public class User {
     public LocalDateTime getDeleted_at() {
         return deleted_at;
     }
-    
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
     @PrePersist
     protected void onCreate() {
         created_at = LocalDateTime.now();
