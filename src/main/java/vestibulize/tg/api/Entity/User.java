@@ -11,16 +11,16 @@ import java.time.LocalDateTime;
 import jakarta.persistence.Column;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
+import jakarta.persistence.Transient;
 
 @Entity
 public class User {
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "username", unique = true)
     private String username;
     @Column(name = "email", unique = true)
     private String email;
@@ -56,7 +56,7 @@ public class User {
     }
     
     public void setPassword(String password) {
-        this.password = passwordEncoder.encode(password);
+        this.password = password;
     }
 
     public String getPassword() {
