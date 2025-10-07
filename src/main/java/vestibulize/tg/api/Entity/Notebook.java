@@ -20,14 +20,13 @@ public class Notebook {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Transient
-    private User user;
-    @Column(name = "user_id")
     private Long user_id;
     private String title;
     private String description;
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
+    @Transient
+    private User user;
 
     public Notebook() {}
 
@@ -98,6 +97,17 @@ public class Notebook {
 
     public void setUpdated_at(LocalDateTime updated_at) {
         this.updated_at = updated_at;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        created_at = LocalDateTime.now();
+        updated_at = LocalDateTime.now();
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        updated_at = LocalDateTime.now();
     }
     
 }
