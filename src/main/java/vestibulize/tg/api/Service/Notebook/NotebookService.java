@@ -17,8 +17,13 @@ public class NotebookService {
         return notebookRepository.save(notebook);
     }
 
-    public List<Notebook> listNotebooks(Long user_id) {
-        return notebookRepository.listByUserId(user_id);
+    public List<Notebook> listNotebooks(Long user_id, String search) {
+
+        if (search == null || search.trim().isEmpty()) {
+            return notebookRepository.listByUserId(user_id);
+        }
+        
+        return notebookRepository.listByUserIdAndFilter(user_id, search.trim());
     }
 
     public Notebook updateNotebook(Notebook notebook, Long id) {

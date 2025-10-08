@@ -36,8 +36,8 @@ public class NotebookController {
     }
 
     @GetMapping("/notebook")
-    public ResponseEntity<List<Notebook>> listNotebooks(@RequestHeader(value = "token", required = true) String token) {
-        return ResponseEntity.status(HttpStatus.OK).body(notebookService.listNotebooks(jwtUtil.extractId(token)));
+    public ResponseEntity<List<Notebook>> listNotebooks(@RequestHeader(value = "token", required = true) String token, @RequestParam(value = "search", required = false) String search) {
+        return ResponseEntity.status(HttpStatus.OK).body(notebookService.listNotebooks(jwtUtil.extractId(token), search));
     }
 
     @PutMapping("/notebook/{id}")
