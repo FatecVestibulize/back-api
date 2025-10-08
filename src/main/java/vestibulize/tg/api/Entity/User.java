@@ -34,7 +34,8 @@ public class User {
 
     public User() {}
 
-    public User(String username, String email, String password, LocalDate birth_date) {
+    public User(Long id, String username, String email, String password, LocalDate birth_date) {
+        this.setId(id);
         this.setUsername(username);
         this.setEmail(email);
         this.setPassword(password);
@@ -45,6 +46,14 @@ public class User {
         this.setToken(token);
         this.setUsername(username);
         this.setEmail(email);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public void setUsername(String username) {
