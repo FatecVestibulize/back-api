@@ -55,4 +55,26 @@ public class UserController {
         }
     }
 
+    // endpoint resumo do usuário para o front
+    @GetMapping("/user/resumo")
+    public ResponseEntity<?> getResumo(@RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", ""); // NOVO
+            Long userId = jwtUtil.extractId(token); // NOVO
+
+            // contagem de cadernos
+            int totalCadernos = userService.countCadernos(userId);
+
+            // outros dados ainda mockados
+            var resumo = new java.util.HashMap<String, Object>();
+            resumo.put("cadernos", totalCadernos);
+            resumo.put("quizzes", 6); // mock
+            resumo.put("metasAtivas", 3); // mock
+            resumo.put("proximaData", "Amanhã"); // mock
+
+            return ResponseEntity.ok(resumo);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 }
