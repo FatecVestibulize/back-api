@@ -12,6 +12,8 @@ import jakarta.persistence.Column;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import jakarta.persistence.Transient;
+import java.util.List;
+import vestibulize.tg.api.Entity.Note;
 
 @Entity
 public class Notebook {
@@ -27,6 +29,8 @@ public class Notebook {
     private LocalDateTime updated_at;
     @Transient
     private User user;
+    @Transient
+    private List<Note> notes;
 
     public Notebook() {}
 
@@ -81,6 +85,14 @@ public class Notebook {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public List<Note> getNotes() {
+        return notes;
+    }
+
+    public void setNotes(List<Note> notes) {
+        this.notes = notes;
     }
 
     public LocalDateTime getCreated_at() {
