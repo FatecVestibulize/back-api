@@ -19,17 +19,19 @@ public class Exam {
     @Transient
     private User user;
     private Long user_id;
-    private LocalDate date;
+    private LocalDateTime date;
     private String name;
+    private String description;
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
 
     public Exam() {}
 
-    public Exam(Long id, LocalDate date, String name) {
+    public Exam(Long id, LocalDateTime date, String name, String description) {
         this.setId(id);
         this.setDate(date);
         this.setName(name);
+        this.setDescription(description);
     }
 
     public Long getId() {
@@ -56,11 +58,11 @@ public class Exam {
         this.user_id = user_id;
     }
 
-    public LocalDate getDate() {
+    public LocalDateTime getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public void setDate(LocalDateTime date) {
         this.date = date;
     }
     
@@ -70,6 +72,14 @@ public class Exam {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public LocalDateTime getCreated_at() {
