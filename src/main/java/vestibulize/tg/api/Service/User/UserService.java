@@ -70,4 +70,29 @@ public class UserService {
         return notebookService.listNotebooks(userId, null).size();
     }
 
+}    // listar amigos do usuário
+    public List<User> listFriends(Long userId) {
+        List<Long> friendIds = friendMap.getOrDefault(userId, new ArrayList<>()); // NOVO
+        List<User> friends = new ArrayList<>();
+        for (Long fid : friendIds) {
+            userRepository.findById(fid).ifPresent(friends::add);
+        }
+        return friends;
+    }
+
+    // adicionar amigo
+    public void addFriend(Long userId, Long friendId) {
+        friendMap.computeIfAbsent(userId, k -> new ArrayList<>());
+        List<Long> friends = friendMap.get(userId);
+        if (!friends.contains(friendId)) {
+            friends.add(friendId);
+        }
+    }
+
+    // listar todos os usuários exceto o logado
+    public List<User> listAllUsers(Long userId) {
+        return userRepository.findAll().stream()
+                .filter(u -> !u.getId().equals(userId))
+                .collect(Collectors.toList());
+    }
 }
