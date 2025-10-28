@@ -13,11 +13,17 @@ import vestibulize.tg.api.Service.Notebook.NotebookService;
 import org.springframework.web.bind.annotation.RequestHeader;
 import vestibulize.tg.api.Utils.JwtUtil;
 
+import vestibulize.tg.api.Entity.Note;
+import vestibulize.tg.api.Service.Note.NoteService;
+
 @CrossOrigin(origins = "*")
 @RestController
 public class NotebookController {
     @Autowired
     private NotebookService notebookService;
+    
+    @Autowired
+    private NoteService noteService;
     
     @Autowired
     private JwtUtil jwtUtil;
@@ -63,6 +69,12 @@ public class NotebookController {
             System.out.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error during delete notebook: " + e.getMessage());
         }
+    }
+
+
+    @GetMapping("notebook/{notebook_id}/notes")
+    public ResponseEntity<List<Note>> listNotes(@RequestHeader(value = "token", required = true) String token, @RequestParam(value = "search", required = false) String search, @PathVariable Long notebook_id) {
+        return ResponseEntity.status(HttpStatus.OK).body(noteService.listNotes(notebook_id, search));
     }
 
 }
