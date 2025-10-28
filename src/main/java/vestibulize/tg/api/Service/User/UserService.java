@@ -70,7 +70,7 @@ public class UserService {
         return notebookService.listNotebooks(userId, null).size();
     }
 
-}    // listar amigos do usuário
+    // listar amigos do usuário
     public List<User> listFriends(Long userId) {
         List<Long> friendIds = friendMap.getOrDefault(userId, new ArrayList<>()); // NOVO
         List<User> friends = new ArrayList<>();
