@@ -77,4 +77,43 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+    // listar amigos do usuário logado
+    @GetMapping("/user/friends")
+    public ResponseEntity<?> getFriends(@RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            Long userId = jwtUtil.extractId(token);
+            List<User> friends = userService.listFriends(userId);
+            return ResponseEntity.ok(friends);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    // adicionar amigo
+    @PostMapping("/user/friends/{friendId}")
+    public ResponseEntity<?> addFriend(@RequestHeader("Authorization") String authHeader,
+                                       @PathVariable Long friendId) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            Long userId = jwtUtil.extractId(token);
+            userService.addFriend(userId, friendId); // NOVO
+            return ResponseEntity.ok("Amigo adicionado com sucesso");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    // listar todos usuários
+    @GetMapping("/user/all")
+    public ResponseEntity<?> listAllUsers(@RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            Long userId = jwtUtil.extractId(token);
+            var users = userService.listAllUsers(userId);
+            return ResponseEntity.ok(users);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 }
