@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import vestibulize.tg.api.Entity.User;
 import vestibulize.tg.api.Repository.User.UserRepository;
+import vestibulize.tg.api.Service.Notebook.NotebookService;
 import vestibulize.tg.api.Utils.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -21,6 +22,12 @@ public class UserService {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private NotebookService notebookService;
+
+    //armazenamento simples de amigos (mock)
+    private final java.util.Map<Long, List<Long>> friendMap = new java.util.HashMap<>(); // NOVO
 
     public User createUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -59,5 +66,8 @@ public class UserService {
         return new User(newToken, existingUser.getUsername(), existingUser.getEmail());
     }
 
+    public int countCadernos(Long userId) {
+        return notebookService.listNotebooks(userId, null).size();
+    }
 
 }
