@@ -7,6 +7,10 @@ import vestibulize.tg.api.Repository.User.UserRepository;
 import vestibulize.tg.api.Utils.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class UserService {
     @Autowired
@@ -32,8 +36,27 @@ public class UserService {
         }
 
         String token = jwtUtil.generateToken(userOptional.getUsername(), userOptional.getId());
+        return new User(token, userOptional.getUsername(), userOptional.getEmail());
+    }
 
-        return (new User(token, userOptional.getUsername(), userOptional.getEmail()));
+    public User updateUser(String token, User updatedUser) {
+        Long userId = jwtUtil.extractId(token);
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        if (updatedUser.getUsername() != null && !updatedUser.getUsername().isBlank()) {
+            existingUser.setUsername(updatedUser.getUsername());
+        }
+
+        if (updatedUser.getPassword() != null && !updatedUser.getPassword().isBlank()) {
+            existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+        }
+
+        userRepository.save(existingUser);
+
+        String newToken = jwtUtil.generateToken(existingUser.getUsername(), existingUser.getId());
+
+        return new User(newToken, existingUser.getUsername(), existingUser.getEmail());
     }
 
 
