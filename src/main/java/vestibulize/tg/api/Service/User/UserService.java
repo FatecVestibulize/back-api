@@ -3,19 +3,43 @@ package vestibulize.tg.api.Service.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import vestibulize.tg.api.Entity.User;
+import vestibulize.tg.api.Entity.Friendship.Friendship;
+import vestibulize.tg.api.Entity.Friendship.FriendRequest;
 import vestibulize.tg.api.Repository.User.UserRepository;
+import vestibulize.tg.api.Repository.Friendship.FriendshipRepository;
+import vestibulize.tg.api.Repository.Friendship.FriendRequestRepository;
+import vestibulize.tg.api.Service.Goal.GoalService;
+import vestibulize.tg.api.Service.Exam.ExamService;
 import vestibulize.tg.api.Service.Notebook.NotebookService;
 import vestibulize.tg.api.Utils.JwtUtil;
+import vestibulize.tg.api.Entity.Exam;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Comparator;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class UserService {
+
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private FriendshipRepository friendshipRepository;
+
+    @Autowired
+    private FriendRequestRepository friendRequestRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -35,11 +59,9 @@ public class UserService {
     }
 
     public User authenticate(User userRequest) {
-
         User userOptional = userRepository.findByUsername(userRequest.getUsername());
-
-        if (!passwordEncoder.matches(userRequest.getPassword(), userOptional.getPassword())) {
-            throw new RuntimeException("Invalid password");
+        if (userOptional == null || !passwordEncoder.matches(userRequest.getPassword(), userOptional.getPassword())) {
+            throw new RuntimeException("Invalid username or password");
         }
 
         String token = jwtUtil.generateToken(userOptional.getUsername(), userOptional.getId());
@@ -48,7 +70,7 @@ public class UserService {
 
     public User updateUser(String token, User updatedUser) {
         Long userId = jwtUtil.extractId(token);
-        User existingUser = userRepository.findById(userId)
+        User existingUser = userRepository.findById(Math.toIntExact(userId))
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
         if (updatedUser.getUsername() != null && !updatedUser.getUsername().isBlank()) {
@@ -60,9 +82,7 @@ public class UserService {
         }
 
         userRepository.save(existingUser);
-
         String newToken = jwtUtil.generateToken(existingUser.getUsername(), existingUser.getId());
-
         return new User(newToken, existingUser.getUsername(), existingUser.getEmail());
     }
 
@@ -70,23 +90,70 @@ public class UserService {
         return notebookService.listNotebooks(userId, null).size();
     }
 
-    // listar amigos do usuário
-    public List<User> listFriends(Long userId) {
-        List<Long> friendIds = friendMap.getOrDefault(userId, new ArrayList<>()); // NOVO
-        List<User> friends = new ArrayList<>();
-        for (Long fid : friendIds) {
-            userRepository.findById(fid).ifPresent(friends::add);
+
+
+    // enviar solicitação de amizade
+    public void sendFriendRequest(Long userId, Long targetId) {
+        if (Objects.equals(userId, targetId)) return;
+
+        User sender = userRepository.findById(Math.toIntExact(userId)).orElseThrow();
+        User receiver = userRepository.findById(Math.toIntExact(targetId)).orElseThrow();
+
+        boolean exists = friendRequestRepository.findBySenderAndReceiver(sender, receiver).isPresent()
+                || friendshipRepository.findByUserAOrUserB(sender, sender)
+                .stream().anyMatch(f -> f.getUserA().equals(receiver) || f.getUserB().equals(receiver));
+
+        if (!exists) {
+            friendRequestRepository.save(new FriendRequest(null, sender, receiver));
         }
-        return friends;
     }
 
-    // adicionar amigo
-    public void addFriend(Long userId, Long friendId) {
-        friendMap.computeIfAbsent(userId, k -> new ArrayList<>());
-        List<Long> friends = friendMap.get(userId);
-        if (!friends.contains(friendId)) {
-            friends.add(friendId);
-        }
+    // aceitar solicitação
+    public void acceptFriendRequest(Long userId, Long fromId) {
+        User receiver = userRepository.findById(Math.toIntExact(userId)).orElseThrow();
+        User sender = userRepository.findById(Math.toIntExact(fromId)).orElseThrow();
+
+        friendRequestRepository.findBySenderAndReceiver(sender, receiver)
+                .ifPresent(req -> {
+                    friendRequestRepository.delete(req);
+                    friendshipRepository.save(new Friendship(null, sender, receiver));
+                    friendshipRepository.save(new Friendship(null, receiver, sender));
+                });
+    }
+
+    // recusar solicitação
+    public void rejectFriendRequest(Long userId, Long fromId) {
+        User receiver = userRepository.findById(Math.toIntExact(userId)).orElseThrow();
+        User sender = userRepository.findById(Math.toIntExact(fromId)).orElseThrow();
+        friendRequestRepository.findBySenderAndReceiver(sender, receiver)
+                .ifPresent(friendRequestRepository::delete);
+    }
+
+    //remove amigo
+    public void removeFriend(Long userId, Long friendId) {
+        User user = userRepository.findById(Math.toIntExact(userId)).orElseThrow();
+        User friend = userRepository.findById(Math.toIntExact(friendId)).orElseThrow();
+
+        friendshipRepository.findByUserAOrUserB(user, user).stream()
+                .filter(f -> f.getUserA().equals(friend) || f.getUserB().equals(friend))
+                .forEach(friendshipRepository::delete);
+    }
+
+
+    // listar amigos
+    public List<User> listFriends(Long userId) {
+        User user = userRepository.findById(Math.toIntExact(userId)).orElseThrow();
+        List<Friendship> friendships = friendshipRepository.findByUserAOrUserB(user, user);
+        return friendships.stream()
+                .map(f -> f.getUserA().equals(user) ? f.getUserB() : f.getUserA())
+                .toList();
+    }
+
+    // listar solicitações recebidas
+    public List<User> listFriendRequests(Long userId) {
+        User receiver = userRepository.findById(Math.toIntExact(userId)).orElseThrow();
+        List<FriendRequest> requests = friendRequestRepository.findByReceiver(receiver);
+        return requests.stream().map(FriendRequest::getSender).toList();
     }
 
     // listar todos os usuários exceto o logado
@@ -94,5 +161,12 @@ public class UserService {
         return userRepository.findAll().stream()
                 .filter(u -> !u.getId().equals(userId))
                 .collect(Collectors.toList());
+    }
+
+    // verificar se há solicitação pendente
+    public boolean hasPendingRequest(Long userId, Long targetId) {
+        User sender = userRepository.findById(Math.toIntExact(userId)).orElseThrow();
+        User receiver = userRepository.findById(Math.toIntExact(targetId)).orElseThrow();
+        return friendRequestRepository.findBySenderAndReceiver(sender, receiver).isPresent();
     }
 }
