@@ -49,9 +49,10 @@ public class UserService {
 
     @Autowired
     private NotebookService notebookService;
-
-    //armazenamento simples de amigos (mock)
-    private final java.util.Map<Long, List<Long>> friendMap = new java.util.HashMap<>(); // NOVO
+    @Autowired
+    private GoalService goalService;
+    @Autowired
+    private ExamService examService;
 
     public User createUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -86,8 +87,27 @@ public class UserService {
         return new User(newToken, existingUser.getUsername(), existingUser.getEmail());
     }
 
+    // contar cadernos
     public int countCadernos(Long userId) {
         return notebookService.listNotebooks(userId, null).size();
+    }
+    // contar metas
+    public int countMetas(Long userId) {
+        return goalService.listGoals(userId, null).size();
+    }
+    //ultima data
+    public LocalDate getNextExamDate(Long userId) {
+        LocalDate today = LocalDate.now();
+        List<Exam> exams = examService.listExams(userId, null);
+
+        return exams.stream()
+                .map(Exam::getDate)
+                .filter(Objects::nonNull)
+                .map(date -> date.toLocalDate())
+                .filter(date -> !date.isBefore(today))
+                .sorted(Comparator.naturalOrder())
+                .findFirst()
+                .orElse(null);
     }
 
 
