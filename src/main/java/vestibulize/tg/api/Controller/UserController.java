@@ -9,15 +9,17 @@ import vestibulize.tg.api.Entity.User;
 import vestibulize.tg.api.Service.User.UserService;
 import vestibulize.tg.api.Utils.JwtUtil;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "*")
 public class UserController {
+
     @Autowired
     private UserService userService;
 
-    //  jwtUtil injetado para extrair ID do token
     @Autowired
     private JwtUtil jwtUtil;
 
@@ -37,12 +39,10 @@ public class UserController {
             User loggedUser = userService.authenticate(user);
             return ResponseEntity.status(HttpStatus.OK).body(loggedUser);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new User());
         }
     }
 
-    // atualizar usuário (nome e senha)
     @PutMapping("/user/update")
     public ResponseEntity<?> updateUser(@RequestHeader("Authorization") String authHeader,
                                         @RequestBody User updatedUser) {
@@ -55,7 +55,6 @@ public class UserController {
         }
     }
 
-    // endpoint resumo do usuário para o front
     @GetMapping("/user/resumo")
     public ResponseEntity<?> getResumo(@RequestHeader("Authorization") String authHeader) {
         try {
@@ -77,7 +76,8 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
-    // listar amigos do usuário logado
+
+
     @GetMapping("/user/friends")
     public ResponseEntity<?> getFriends(@RequestHeader("Authorization") String authHeader) {
         try {
@@ -90,21 +90,70 @@ public class UserController {
         }
     }
 
-    // adicionar amigo
-    @PostMapping("/user/friends/{friendId}")
-    public ResponseEntity<?> addFriend(@RequestHeader("Authorization") String authHeader,
-                                       @PathVariable Long friendId) {
+    @PostMapping("/user/friend-request/{targetId}")
+    public ResponseEntity<?> sendFriendRequest(@RequestHeader("Authorization") String authHeader,
+                                               @PathVariable Long targetId) {
         try {
             String token = authHeader.replace("Bearer ", "");
             Long userId = jwtUtil.extractId(token);
-            userService.addFriend(userId, friendId); // NOVO
-            return ResponseEntity.ok("Amigo adicionado com sucesso");
+            userService.sendFriendRequest(userId, targetId);
+            return ResponseEntity.ok("Solicitação enviada");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
-    // listar todos usuários
+    @PostMapping("/user/friend-request/accept/{fromId}")
+    public ResponseEntity<?> acceptFriendRequest(@RequestHeader("Authorization") String authHeader,
+                                                 @PathVariable Long fromId) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            Long userId = jwtUtil.extractId(token);
+            userService.acceptFriendRequest(userId, fromId);
+            return ResponseEntity.ok("Solicitação aceita");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+
+    @PostMapping("/user/friend-request/reject/{fromId}")
+    public ResponseEntity<?> rejectFriendRequest(@RequestHeader("Authorization") String authHeader,
+                                                 @PathVariable Long fromId) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            Long userId = jwtUtil.extractId(token);
+            userService.rejectFriendRequest(userId, fromId);
+            return ResponseEntity.ok("Solicitação recusada");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/user/friend-requests")
+    public ResponseEntity<?> listFriendRequests(@RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            Long userId = jwtUtil.extractId(token);
+            var requests = userService.listFriendRequests(userId);
+            return ResponseEntity.ok(requests);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/user/friend/{friendId}")
+    public ResponseEntity<?> removeFriend(@RequestHeader("Authorization") String authHeader,
+                                          @PathVariable Long friendId) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            Long userId = jwtUtil.extractId(token);
+            userService.removeFriend(userId, friendId);
+            return ResponseEntity.ok("Amigo removido");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
     @GetMapping("/user/all")
     public ResponseEntity<?> listAllUsers(@RequestHeader("Authorization") String authHeader) {
         try {
