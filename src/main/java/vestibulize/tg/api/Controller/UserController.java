@@ -58,18 +58,19 @@ public class UserController {
     @GetMapping("/user/resumo")
     public ResponseEntity<?> getResumo(@RequestHeader("Authorization") String authHeader) {
         try {
-            String token = authHeader.replace("Bearer ", ""); // NOVO
-            Long userId = jwtUtil.extractId(token); // NOVO
+            String token = authHeader.replace("Bearer ", "");
+            Long userId = jwtUtil.extractId(token);
 
-            // contagem de cadernos
             int totalCadernos = userService.countCadernos(userId);
+            int totalMetas = userService.countMetas(userId);
+            LocalDate proximaData = userService.getNextExamDate(userId);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-            // outros dados ainda mockados
             var resumo = new java.util.HashMap<String, Object>();
             resumo.put("cadernos", totalCadernos);
-            resumo.put("quizzes", 6); // mock
-            resumo.put("metasAtivas", 3); // mock
-            resumo.put("proximaData", "Amanhã"); // mock
+            resumo.put("quizzes", 6);
+            resumo.put("metasAtivas", totalMetas);
+            resumo.put("proximaData", proximaData != null ? proximaData.format(formatter) : "Nenhum exame");
 
             return ResponseEntity.ok(resumo);
         } catch (Exception e) {
