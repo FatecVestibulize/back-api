@@ -48,4 +48,32 @@ public class PasswordService {
 
     }
 
+    public Boolean resetPassword(String token, String password) {
+
+
+        PasswordRequest passwordRequest = passwordRequestRepository.findByToken(token);
+
+        if (passwordRequest == null) {
+            throw new RuntimeException("Token inválido.");
+        }
+
+        if (passwordRequest.getExpiration_at().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Token expirado.");
+        }
+
+        User user = userRepository.findById(passwordRequest.getUser_id());
+
+        user.setPassword(passwordEncoder.encode(password));
+        
+        try {
+            
+            userRepository.save(user);
+            return true;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error saving user: " + e.getMessage());
+        }
+
+    }
+    
 }

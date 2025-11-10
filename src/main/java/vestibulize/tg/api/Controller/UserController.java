@@ -21,6 +21,20 @@ public class UserController {
     @Autowired
     private PasswordService passwordService;
 
+    @PatchMapping("/user/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> payload) {
+        try {
+            String token = payload.get("token");
+            String password = payload.get("password");
+
+            passwordService.resetPassword(token, password);
+            return ResponseEntity.status(HttpStatus.OK).body("Senha alterada com sucesso.");
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
     @PostMapping("/user/forgot-password")
     public ResponseEntity<Boolean> forgotPassword(@Valid @RequestBody User user) {
 
