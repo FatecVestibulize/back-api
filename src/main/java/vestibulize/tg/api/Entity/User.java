@@ -10,6 +10,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import jakarta.persistence.Column;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import jakarta.persistence.Transient;
 
@@ -34,7 +38,8 @@ public class User {
 
     public User() {}
 
-    public User(String username, String email, String password, LocalDate birth_date) {
+    public User(Long id, String username, String email, String password, LocalDate birth_date) {
+        this.setId(id);
         this.setUsername(username);
         this.setEmail(email);
         this.setPassword(password);
@@ -45,6 +50,14 @@ public class User {
         this.setToken(token);
         this.setUsername(username);
         this.setEmail(email);
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+    
+    public Long getId() {
+        return id;
     }
 
     public void setUsername(String username) {
