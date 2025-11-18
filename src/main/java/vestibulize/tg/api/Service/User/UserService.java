@@ -12,20 +12,9 @@ import vestibulize.tg.api.Service.Goal.GoalService;
 import vestibulize.tg.api.Service.Exam.ExamService;
 import vestibulize.tg.api.Service.Notebook.NotebookService;
 import vestibulize.tg.api.Utils.JwtUtil;
-import vestibulize.tg.api.Entity.Exam;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import java.time.LocalDate;
-import java.util.Comparator;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Comparator;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -87,32 +76,26 @@ public class UserService {
         return new User(newToken, existingUser.getUsername(), existingUser.getEmail());
     }
 
-    // contar cadernos
+    // Contagem e resumo
     public int countCadernos(Long userId) {
         return notebookService.listNotebooks(userId, null).size();
     }
-    // contar metas
+
     public int countMetas(Long userId) {
         return goalService.listGoals(userId, null).size();
     }
-    //ultima data
+
     public LocalDate getNextExamDate(Long userId) {
         LocalDate today = LocalDate.now();
-        List<Exam> exams = examService.listExams(userId, null);
-
-        return exams.stream()
-                .map(Exam::getDate)
-                .filter(Objects::nonNull)
-                .map(date -> date.toLocalDate())
-                .filter(date -> !date.isBefore(today))
-                .sorted(Comparator.naturalOrder())
+        return examService.listExams(userId, null).stream()
+                .map(e -> e.getDate().toLocalDate())
+                .filter(d -> !d.isBefore(today))
+                .sorted()
                 .findFirst()
                 .orElse(null);
     }
 
-
-
-    // enviar solicitação de amizade
+    // Friendships
     public void sendFriendRequest(Long userId, Long targetId) {
         if (Objects.equals(userId, targetId)) return;
 
@@ -128,7 +111,6 @@ public class UserService {
         }
     }
 
-    // aceitar solicitação
     public void acceptFriendRequest(Long userId, Long fromId) {
         User receiver = userRepository.findById(Math.toIntExact(userId)).orElseThrow();
         User sender = userRepository.findById(Math.toIntExact(fromId)).orElseThrow();
@@ -141,7 +123,6 @@ public class UserService {
                 });
     }
 
-    // recusar solicitação
     public void rejectFriendRequest(Long userId, Long fromId) {
         User receiver = userRepository.findById(Math.toIntExact(userId)).orElseThrow();
         User sender = userRepository.findById(Math.toIntExact(fromId)).orElseThrow();
@@ -149,7 +130,6 @@ public class UserService {
                 .ifPresent(friendRequestRepository::delete);
     }
 
-    //remove amigo
     public void removeFriend(Long userId, Long friendId) {
         User user = userRepository.findById(Math.toIntExact(userId)).orElseThrow();
         User friend = userRepository.findById(Math.toIntExact(friendId)).orElseThrow();
@@ -159,8 +139,6 @@ public class UserService {
                 .forEach(friendshipRepository::delete);
     }
 
-
-    // listar amigos
     public List<User> listFriends(Long userId) {
         User user = userRepository.findById(Math.toIntExact(userId)).orElseThrow();
         List<Friendship> friendships = friendshipRepository.findByUserAOrUserB(user, user);
@@ -169,24 +147,43 @@ public class UserService {
                 .toList();
     }
 
-    // listar solicitações recebidas
     public List<User> listFriendRequests(Long userId) {
         User receiver = userRepository.findById(Math.toIntExact(userId)).orElseThrow();
         List<FriendRequest> requests = friendRequestRepository.findByReceiver(receiver);
         return requests.stream().map(FriendRequest::getSender).toList();
     }
 
-    // listar todos os usuários exceto o logado
     public List<User> listAllUsers(Long userId) {
         return userRepository.findAll().stream()
                 .filter(u -> !u.getId().equals(userId))
                 .collect(Collectors.toList());
     }
 
-    // verificar se há solicitação pendente
     public boolean hasPendingRequest(Long userId, Long targetId) {
         User sender = userRepository.findById(Math.toIntExact(userId)).orElseThrow();
         User receiver = userRepository.findById(Math.toIntExact(targetId)).orElseThrow();
         return friendRequestRepository.findBySenderAndReceiver(sender, receiver).isPresent();
+    }
+
+    //online status
+    public void setUserOnline(String username, boolean online) {
+        User user = userRepository.findByUsername(username);
+        if (user != null) {
+            user.setOnline(online);
+            userRepository.save(user);
+        }
+    }
+
+    //offline
+    public void setUserOffline(Long userId) {
+        User user = userRepository.findById(Math.toIntExact(userId)).orElseThrow();
+        user.setOnline(false);
+        userRepository.save(user);
+    }
+    public List<Long> getOnlineUsers() {
+        return userRepository.findAll().stream()
+                .filter(User::isOnline)
+                .map(User::getId)
+                .toList();
     }
 }
