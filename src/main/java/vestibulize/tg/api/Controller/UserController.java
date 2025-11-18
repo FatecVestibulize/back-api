@@ -71,9 +71,22 @@ public class UserController {
     public ResponseEntity<User> loginUser(@Valid @RequestBody User user) {
         try {
             User loggedUser = userService.authenticate(user);
+            userService.setUserOnline(loggedUser.getUsername(), true);
             return ResponseEntity.status(HttpStatus.OK).body(loggedUser);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new User());
+        }
+    }
+
+    @PostMapping("/user/logout")
+    public ResponseEntity<?> logoutUser(@RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            Long userId = jwtUtil.extractId(token);
+            userService.setUserOffline(userId);
+            return ResponseEntity.ok("Usuário desconectado");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
@@ -189,6 +202,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
     @GetMapping("/user/all")
     public ResponseEntity<?> listAllUsers(@RequestHeader("Authorization") String authHeader) {
         try {
@@ -196,6 +210,18 @@ public class UserController {
             Long userId = jwtUtil.extractId(token);
             var users = userService.listAllUsers(userId);
             return ResponseEntity.ok(users);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/user/online")
+    public ResponseEntity<?> getOnlineUsers(@RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            Long userId = jwtUtil.extractId(token);
+            List<Long> onlineIds = userService.getOnlineUsers();
+            return ResponseEntity.ok(onlineIds);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
