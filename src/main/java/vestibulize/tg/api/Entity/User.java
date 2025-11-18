@@ -2,29 +2,14 @@ package vestibulize.tg.api.Entity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import jakarta.persistence.Column;
-
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
-
-import org.springframework.security.crypto.password.PasswordEncoder;
 import jakarta.persistence.Transient;
 
 @Entity
@@ -45,30 +30,16 @@ public class User {
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
     private LocalDateTime deleted_at;
+    
+    private boolean online = false;
 
     @Transient
-    private String token; //usado apenas para frontend
-
-    // relacionamento de amigos
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "user_friends",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "friend_id")
-    )
-    private Set<User> friends = new HashSet<>();
+    private String token; 
 
     public User() {}
 
     public User(Long id, String username, String email, String password, LocalDate birth_date) {
-        this.setId(id);
-        this.setUsername(username);
-        this.setEmail(email);
-        this.setPassword(password);
-        this.setBirth_date(birth_date);
-    }
-
-    public void setUsername(String username) {
+        this.id = id;
         this.username = username;
         this.email = email;
         this.password = password;
@@ -86,6 +57,7 @@ public class User {
     public void setId(Long id) { this.id = id; }
 
     public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
@@ -107,9 +79,9 @@ public class User {
 
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
-
-    public Set<User> getFriends() { return friends; }
-    public void setFriends(Set<User> friends) { this.friends = friends; }
+    
+    public boolean isOnline() { return online; }
+    public void setOnline(boolean online) { this.online = online; }
 
     @PrePersist
     protected void onCreate() {
