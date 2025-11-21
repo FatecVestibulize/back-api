@@ -77,4 +77,15 @@ public class NotebookController {
         return ResponseEntity.status(HttpStatus.OK).body(noteService.listNotes(notebook_id, search));
     }
 
+    @PostMapping("/notebook/{notebook_id}/resumir")
+    public ResponseEntity<String> resumirCaderno(@PathVariable Long notebook_id, @RequestHeader(value = "token", required = true) String token) {
+        try{
+            String resumo = notebookService.resumirCaderno(notebook_id, jwtUtil.extractId(token));
+            return ResponseEntity.status(HttpStatus.OK).body(resumo);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error during notebook summarization: " + e.getMessage());
+        }
+    }
+
 }
