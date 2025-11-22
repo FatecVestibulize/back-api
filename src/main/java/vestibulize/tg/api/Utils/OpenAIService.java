@@ -7,6 +7,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.github.cdimascio.dotenv.Dotenv;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -15,8 +17,8 @@ import java.util.Map;
 @Service
 public class OpenAIService {
 
-    @Value("${openai.api.key}")
-    private String apiKey;
+    Dotenv dotenv = Dotenv.load();
+    private String apiKey = dotenv.get("OPENAI_API_KEY");
 
     private WebClient webClient;
 
@@ -25,7 +27,7 @@ public class OpenAIService {
     public OpenAIService() {
         this.webClient = WebClient.builder()
                 .baseUrl("https://api.openai.com/v1/chat/completions")
-                .defaultHeader("Authorization", "Bearer " + apiKey)
+                .defaultHeader("Authorization", "Bearer " + System.getProperty("OPENAI_API_KEY", System.getenv("OPENAI_API_KEY")))
                 .defaultHeader("Content-Type", "application/json")
                 .build();
     }
