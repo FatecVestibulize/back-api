@@ -49,12 +49,12 @@ public class UserService {
     }
 
     public User authenticate(User userRequest) {
-        User userOptional = userRepository.findByUsername(userRequest.getUsername());
+        User userOptional = userRepository.findByEmail(userRequest.getEmail());
         if (userOptional == null || !passwordEncoder.matches(userRequest.getPassword(), userOptional.getPassword())) {
-            throw new RuntimeException("Invalid username or password");
+            throw new RuntimeException("Invalid email or password");
         }
 
-        String token = jwtUtil.generateToken(userOptional.getUsername(), userOptional.getId());
+        String token = jwtUtil.generateToken(userOptional.getEmail(), userOptional.getId());
         return new User(token, userOptional.getUsername(), userOptional.getEmail());
     }
 
