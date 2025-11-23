@@ -23,7 +23,7 @@ public class Notebook {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-    
+    private Long user_id;
     private String title;
     private String description;
     
@@ -54,6 +54,14 @@ public class Notebook {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(Long user_id) {
+        this.user_id = user_id;
     }
 
     public User getUser() {
