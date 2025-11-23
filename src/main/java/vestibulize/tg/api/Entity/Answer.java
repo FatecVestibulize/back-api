@@ -4,7 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Transient;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
 import java.time.LocalDateTime;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -17,6 +18,11 @@ public class Answer {
     private Long id;
     private String statement;
     private Boolean is_correct;
+    
+    @ManyToOne
+    @JoinColumn(name = "question_id", nullable = false, insertable = false, updatable = false)
+    private Question question;
+    
     private Long question_id;
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
@@ -37,6 +43,14 @@ public class Answer {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Question getQuestion() {
+        return question;
+    }
+
+    public void setQuestion(Question question) {
+        this.question = question;
     }
 
     public Long getQuestion_id() {

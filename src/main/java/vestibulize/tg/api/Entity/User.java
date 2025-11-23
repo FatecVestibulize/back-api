@@ -2,12 +2,15 @@ package vestibulize.tg.api.Entity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Transient;
@@ -34,7 +37,22 @@ public class User {
     private boolean online = false;
 
     @Transient
-    private String token; 
+    private String token;
+    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Quiz> quizzes;
+    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Goal> goals;
+    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Exam> exams;
+    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Notebook> notebooks;
+    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<PasswordRequest> passwordRequests; 
 
     public User() {}
 
@@ -82,6 +100,21 @@ public class User {
     
     public boolean isOnline() { return online; }
     public void setOnline(boolean online) { this.online = online; }
+
+    public List<Quiz> getQuizzes() { return quizzes; }
+    public void setQuizzes(List<Quiz> quizzes) { this.quizzes = quizzes; }
+
+    public List<Goal> getGoals() { return goals; }
+    public void setGoals(List<Goal> goals) { this.goals = goals; }
+
+    public List<Exam> getExams() { return exams; }
+    public void setExams(List<Exam> exams) { this.exams = exams; }
+
+    public List<Notebook> getNotebooks() { return notebooks; }
+    public void setNotebooks(List<Notebook> notebooks) { this.notebooks = notebooks; }
+
+    public List<PasswordRequest> getPasswordRequests() { return passwordRequests; }
+    public void setPasswordRequests(List<PasswordRequest> passwordRequests) { this.passwordRequests = passwordRequests; }
 
     @PrePersist
     protected void onCreate() {

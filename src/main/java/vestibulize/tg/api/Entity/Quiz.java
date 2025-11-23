@@ -4,27 +4,46 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Transient;
+import jakarta.persistence.CascadeType;
 import java.time.LocalDateTime;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import java.util.List;
+
 @Entity
 public class Quiz {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long user_id;
+    
     private String type;
-    @Transient
+    
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false, insertable = false, updatable = false)
     private User user;
+    
+    private Long user_id;
+    
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL)
+    private List<CategoryQuiz> categoryQuizzes;
+    
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL)
+    private List<AnswerQuizQuestion> answerQuizQuestions;
+    
     @Transient
     private List<Question> questions;
+    
     @Transient
     private List<Long> categories_ids;
+    
     @Transient
     private List<Category> categories;
+    
     private LocalDateTime finished_at;
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
@@ -54,12 +73,36 @@ public class Quiz {
         this.user_id = user_id;
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public List<CategoryQuiz> getCategoryQuizzes() {
+        return categoryQuizzes;
+    }
+
+    public void setCategoryQuizzes(List<CategoryQuiz> categoryQuizzes) {
+        this.categoryQuizzes = categoryQuizzes;
+    }
+
     public List<Category> getCategories() {
         return categories;
     }
 
     public void setCategories(List<Category> categories) {
         this.categories = categories;
+    }
+
+    public List<AnswerQuizQuestion> getAnswerQuizQuestions() {
+        return answerQuizQuestions;
+    }
+
+    public void setAnswerQuizQuestions(List<AnswerQuizQuestion> answerQuizQuestions) {
+        this.answerQuizQuestions = answerQuizQuestions;
     }
 
     public LocalDateTime getFinished_at() {

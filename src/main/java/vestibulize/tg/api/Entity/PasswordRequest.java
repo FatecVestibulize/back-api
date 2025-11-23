@@ -4,26 +4,26 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import java.time.LocalDateTime;
-
-import jakarta.persistence.Transient;
-
 import java.util.Random;
-import java.nio.charset.StandardCharsets;
 
 @Entity
 public class PasswordRequest {
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String token;
-    private Long user_id;
-    @Transient
+    
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false, insertable = false, updatable = false)
     private User user;
+    
+    private Long user_id;
     private LocalDateTime expiration_at;
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
