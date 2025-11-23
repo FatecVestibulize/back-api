@@ -9,6 +9,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Transient;
 import jakarta.persistence.CascadeType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -25,14 +26,17 @@ public class Quiz {
     
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false, insertable = false, updatable = false)
+    @JsonIgnore
     private User user;
     
     private Long user_id;
     
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<CategoryQuiz> categoryQuizzes;
     
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<AnswerQuizQuestion> answerQuizQuestions;
     
     @Transient

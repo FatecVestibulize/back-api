@@ -8,6 +8,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -21,9 +22,11 @@ public class Category {
     private String color;
     
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Question> questions;
     
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<CategoryQuiz> categoryQuizzes;
     
     private LocalDateTime created_at;

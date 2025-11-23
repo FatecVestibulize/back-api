@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -21,6 +22,7 @@ public class Answer {
     
     @ManyToOne
     @JoinColumn(name = "question_id", nullable = false, insertable = false, updatable = false)
+    @JsonIgnore
     private Question question;
     
     private Long question_id;

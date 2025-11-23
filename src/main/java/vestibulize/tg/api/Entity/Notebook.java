@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -21,13 +22,15 @@ public class Notebook {
     private Long id;
     
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, insertable = false, updatable = false)
+    @JsonIgnore
     private User user;
     private Long user_id;
     private String title;
     private String description;
     
     @OneToMany(mappedBy = "notebook", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Note> notes;
     
     private LocalDateTime created_at;

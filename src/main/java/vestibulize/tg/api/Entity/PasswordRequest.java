@@ -8,6 +8,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
 import java.util.Random;
 
@@ -21,6 +22,7 @@ public class PasswordRequest {
     
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false, insertable = false, updatable = false)
+    @JsonIgnore
     private User user;
     
     private Long user_id;
