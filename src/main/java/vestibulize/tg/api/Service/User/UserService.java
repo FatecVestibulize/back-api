@@ -77,6 +77,12 @@ public class UserService {
         if (updatedUser.getAvatarColor() != null && !updatedUser.getAvatarColor().isBlank()) {
             existingUser.setAvatarColor(updatedUser.getAvatarColor());
         } 
+
+        //novo 2
+        if (updatedUser.getInterest() != null && !updatedUser.getInterest().isBlank()) {
+            existingUser.setInterest(updatedUser.getInterest());
+        } 
+
         userRepository.save(existingUser);
         String newToken = jwtUtil.generateToken(existingUser.getUsername(), existingUser.getId());
         return new User(newToken, existingUser.getUsername(), existingUser.getEmail());
