@@ -1,22 +1,24 @@
 package vestibulize.tg.api.Service.User;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import vestibulize.tg.api.Entity.User;
-import vestibulize.tg.api.Entity.Friendship.Friendship;
+
 import vestibulize.tg.api.Entity.Friendship.FriendRequest;
-import vestibulize.tg.api.Repository.User.UserRepository;
-import vestibulize.tg.api.Repository.Friendship.FriendshipRepository;
+import vestibulize.tg.api.Entity.Friendship.Friendship;
+import vestibulize.tg.api.Entity.User;
 import vestibulize.tg.api.Repository.Friendship.FriendRequestRepository;
-import vestibulize.tg.api.Service.Goal.GoalService;
+import vestibulize.tg.api.Repository.Friendship.FriendshipRepository;
+import vestibulize.tg.api.Repository.User.UserRepository;
 import vestibulize.tg.api.Service.Exam.ExamService;
+import vestibulize.tg.api.Service.Goal.GoalService;
 import vestibulize.tg.api.Service.Notebook.NotebookService;
 import vestibulize.tg.api.Utils.JwtUtil;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -71,6 +73,10 @@ public class UserService {
             existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
         }
 
+        //novo
+        if (updatedUser.getAvatarColor() != null && !updatedUser.getAvatarColor().isBlank()) {
+            existingUser.setAvatarColor(updatedUser.getAvatarColor());
+        } 
         userRepository.save(existingUser);
         String newToken = jwtUtil.generateToken(existingUser.getUsername(), existingUser.getId());
         return new User(newToken, existingUser.getUsername(), existingUser.getEmail());
@@ -185,5 +191,11 @@ public class UserService {
                 .filter(User::isOnline)
                 .map(User::getId)
                 .toList();
+    }
+    //novo
+    public User getLoggedUser(String token) {
+        Long userId = jwtUtil.extractId(token);
+        return userRepository.findById(Math.toIntExact(userId))
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
     }
 }
