@@ -34,12 +34,13 @@ public class User {
     private boolean online = false;
 
     @Transient
-    private String token; 
     private String token;
 
     @Column(name = "avatar_color")
     private String avatarColor;
 
+    @Column(name = "interest")
+    private String Interest;
 
     public User() {}
 
@@ -90,6 +91,9 @@ public class User {
 
     public String getAvatarColor() { return avatarColor; }
     public void setAvatarColor(String avatarColor) { this.avatarColor = avatarColor; }
+
+    public String getInterest() { return Interest; }
+    public void setInterest(String Interest) { this.Interest = Interest; }
 
     @PrePersist
     protected void onCreate() {
