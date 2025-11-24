@@ -30,11 +30,16 @@ public class User {
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
     private LocalDateTime deleted_at;
-    
+
     private boolean online = false;
 
     @Transient
     private String token; 
+    private String token;
+
+    @Column(name = "avatar_color")
+    private String avatarColor;
+
 
     public User() {}
 
@@ -79,9 +84,12 @@ public class User {
 
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
-    
+
     public boolean isOnline() { return online; }
     public void setOnline(boolean online) { this.online = online; }
+
+    public String getAvatarColor() { return avatarColor; }
+    public void setAvatarColor(String avatarColor) { this.avatarColor = avatarColor; }
 
     @PrePersist
     protected void onCreate() {
