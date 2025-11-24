@@ -1,17 +1,24 @@
 package vestibulize.tg.api.Service.Notebook;
 
+import org.aspectj.apache.bcel.classfile.Module.Open;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import vestibulize.tg.api.Entity.Notebook;
 import vestibulize.tg.api.Repository.Notebook.NotebookRepository;
+import vestibulize.tg.api.Utils.OpenAIService;
+
 import java.util.List;
 import java.lang.Exception;
+import vestibulize.tg.api.Repository.Note.NoteRepository;
 
 @Service
 public class NotebookService {
 
     @Autowired
     private NotebookRepository notebookRepository;
+    @Autowired
+    private NoteRepository noteRepository;
+    
 
     public Notebook createNotebook(Notebook notebook) {
         return notebookRepository.save(notebook);
@@ -53,5 +60,25 @@ public class NotebookService {
         notebookRepository.delete(searchedNotebook);
         
         return "Notebook deleted successfully";
+    }
+
+    public String resumirCaderno(Long id, Long user_id) {
+        Notebook searchedNotebook = notebookRepository.findById(id).orElse(new Notebook());
+
+        if (searchedNotebook.getUser_id() != user_id || searchedNotebook.getId() == null) {
+            throw new RuntimeException("Notebook not found");
+
+        }
+        StringBuilder resumo = new StringBuilder();
+        noteRepository.listByNotebookId(id).forEach(note -> {
+            resumo.append(note.getContent()).append(" ; ");
+            
+        });
+        if(resumo.isEmpty()){
+            throw new RuntimeException("Caderno vazio");
+        } 
+        OpenAIService openAIService = new OpenAIService();
+        System.out.println(resumo.toString());
+        return openAIService.gerarResumo(resumo.toString());
     }
 }

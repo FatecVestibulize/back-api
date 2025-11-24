@@ -2,15 +2,19 @@ package vestibulize.tg.api.Entity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Transient;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class User {
@@ -41,7 +45,27 @@ public class User {
 
     @Column(name = "interest")
     private String Interest;
-
+    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Quiz> quizzes;
+    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Goal> goals;
+    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Exam> exams;
+    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Notebook> notebooks;
+    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<PasswordRequest> passwordRequests; 
+    
     public User() {}
 
     public User(Long id, String username, String email, String password, LocalDate birth_date) {
@@ -94,6 +118,21 @@ public class User {
 
     public String getInterest() { return Interest; }
     public void setInterest(String Interest) { this.Interest = Interest; }
+    
+    public List<Quiz> getQuizzes() { return quizzes; }
+    public void setQuizzes(List<Quiz> quizzes) { this.quizzes = quizzes; }
+
+    public List<Goal> getGoals() { return goals; }
+    public void setGoals(List<Goal> goals) { this.goals = goals; }
+
+    public List<Exam> getExams() { return exams; }
+    public void setExams(List<Exam> exams) { this.exams = exams; }
+
+    public List<Notebook> getNotebooks() { return notebooks; }
+    public void setNotebooks(List<Notebook> notebooks) { this.notebooks = notebooks; }
+
+    public List<PasswordRequest> getPasswordRequests() { return passwordRequests; }
+    public void setPasswordRequests(List<PasswordRequest> passwordRequests) { this.passwordRequests = passwordRequests; }
 
     @PrePersist
     protected void onCreate() {

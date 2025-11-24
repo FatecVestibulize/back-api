@@ -4,33 +4,37 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
-import java.time.LocalDate;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
-import jakarta.persistence.Column;
-
-import org.springframework.security.crypto.password.PasswordEncoder;
-import jakarta.persistence.Transient;
 import java.util.List;
-import vestibulize.tg.api.Entity.Note;
 
 @Entity
 public class Notebook {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false, insertable = false, updatable = false)
+    @JsonIgnore
+    private User user;
     private Long user_id;
     private String title;
     private String description;
+    
+    @OneToMany(mappedBy = "notebook", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Note> notes;
+    
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
-    @Transient
-    private User user;
-    @Transient
-    private List<Note> notes;
 
     public Notebook() {}
 
@@ -55,20 +59,20 @@ public class Notebook {
         this.id = id;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
     public Long getUser_id() {
         return user_id;
     }
 
     public void setUser_id(Long user_id) {
         this.user_id = user_id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getTitle() {

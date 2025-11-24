@@ -4,10 +4,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.CascadeType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import java.util.ArrayList;
+import java.util.List;
 import jakarta.persistence.Transient;
 
 @Entity
@@ -17,12 +23,22 @@ public class Question {
     private Long id;
     private String statement;
     private String exam;
-    private Long category_id;
     private String supporting_material;
-    @Transient
-    private ArrayList<Answer> answers;
-    @Transient
+    
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false, insertable = false, updatable = false)
+    @JsonIgnore
     private Category category;
+    
+    private Long category_id;
+    
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Answer> answers;
+    
+    @Transient
+    private ArrayList<Answer> answersTransient;
+    
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
     private LocalDateTime deleted_at;
@@ -109,12 +125,20 @@ public class Question {
         this.deleted_at = deleted_at;
     }
 
-    public ArrayList<Answer> getAnswers() {
+    public List<Answer> getAnswers() {
         return answers;
     }
 
-    public void setAnswers(ArrayList<Answer> answers) {
+    public void setAnswers(List<Answer> answers) {
         this.answers = answers;
+    }
+
+    public ArrayList<Answer> getAnswersTransient() {
+        return answersTransient;
+    }
+
+    public void setAnswersTransient(ArrayList<Answer> answersTransient) {
+        this.answersTransient = answersTransient;
     }
 
     @PrePersist

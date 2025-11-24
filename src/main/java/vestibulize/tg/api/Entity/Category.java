@@ -4,9 +4,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 public class Category {
@@ -16,6 +20,15 @@ public class Category {
     private Long id;
     private String name;
     private String color;
+    
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Question> questions;
+    
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<CategoryQuiz> categoryQuizzes;
+    
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
     private LocalDateTime deleted_at;
@@ -74,6 +87,22 @@ public class Category {
 
     public void setDeleted_at(LocalDateTime deleted_at) {
         this.deleted_at = LocalDateTime.now();
+    }
+
+    public List<Question> getQuestions() {
+        return questions;
+    }
+
+    public void setQuestions(List<Question> questions) {
+        this.questions = questions;
+    }
+
+    public List<CategoryQuiz> getCategoryQuizzes() {
+        return categoryQuizzes;
+    }
+
+    public void setCategoryQuizzes(List<CategoryQuiz> categoryQuizzes) {
+        this.categoryQuizzes = categoryQuizzes;
     }
 
     @PrePersist

@@ -4,7 +4,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Transient;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -21,15 +23,28 @@ public class AnswerQuizQuestion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long quiz_id;
-    private Long question_id;
-    private Long answer_id;
-    @Transient
-    private Question question;
-    @Transient
-    private Answer answer;
-    @Transient
+    
+    @ManyToOne
+    @JoinColumn(name = "quiz_id", nullable = false, insertable = false, updatable = false)
+    @JsonIgnore
     private Quiz quiz;
+    
+    private Long quiz_id;
+    
+    @ManyToOne
+    @JoinColumn(name = "question_id", nullable = false, insertable = false, updatable = false)
+    @JsonIgnore
+    private Question question;
+    
+    private Long question_id;
+    
+    @ManyToOne
+    @JoinColumn(name = "answer_id", insertable = false, updatable = false)
+    @JsonIgnore
+    private Answer answer;
+    
+    private Long answer_id;
+    
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
 
