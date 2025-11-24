@@ -115,7 +115,7 @@ public class UserController {
 
             var resumo = new java.util.HashMap<String, Object>();
             resumo.put("cadernos", totalCadernos);
-            resumo.put("quizzes", 6);
+            resumo.put("quizzes", 10);
             resumo.put("metasAtivas", totalMetas);
             resumo.put("proximaData", proximaData != null ? proximaData.format(formatter) : "Nenhum exame");
 
@@ -226,4 +226,16 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+    @GetMapping("/user/me")
+    public ResponseEntity<?> getMe(@RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            User user = userService.getLoggedUser(token);
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    } 
 }
+
+
