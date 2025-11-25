@@ -43,6 +43,8 @@ public class User {
     private LocalDateTime deleted_at;
 
     private boolean online = false;
+    private LocalDate lastLoginDate;
+    private int loginStreak = 0;
 
     @Transient
     private String token;
@@ -83,11 +85,12 @@ public class User {
         this.birth_date = birth_date;
     }
 
-    public User(String token, String username, String email, String avatar_url){
+    public User(String token, String username, String email, String avatar_url, int loginStreak){
         this.token = token;
         this.username = username;
         this.email = email;
         this.avatar_url = avatar_url;
+        this.loginStreak = loginStreak;
     }
 
     // Getters e Setters
@@ -147,6 +150,11 @@ public class User {
 
     public String getAvatar_url() { return avatar_url; }
     public void setAvatar_url(String avatar_url) { this.avatar_url = avatar_url; }
+    public LocalDate getLastLoginDate() { return lastLoginDate; }
+    public void setLastLoginDate(LocalDate lastLoginDate) { this.lastLoginDate = lastLoginDate; }
+
+    public int getLoginStreak() { return loginStreak; }
+    public void setLoginStreak(int loginStreak) { this.loginStreak = loginStreak; }
 
     @PrePersist
     protected void onCreate() {

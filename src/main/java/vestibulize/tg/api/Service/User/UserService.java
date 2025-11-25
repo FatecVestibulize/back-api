@@ -9,6 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import vestibulize.tg.api.Entity.User;
+import vestibulize.tg.api.Entity.Friendship.Friendship;
 import vestibulize.tg.api.Entity.Friendship.FriendRequest;
 import vestibulize.tg.api.Entity.Friendship.Friendship;
 import vestibulize.tg.api.Entity.User;
@@ -63,7 +70,8 @@ public class UserService {
         }
 
         String token = jwtUtil.generateToken(userOptional.getEmail(), userOptional.getId());
-        return new User(token, userOptional.getUsername(), userOptional.getEmail(), userOptional.getAvatar_url());
+        processLogin(userOptional.getId());
+        return new User(token, userOptional.getUsername(), userOptional.getEmail(), userOptional.getAvatar_url(), userOptional.getLoginStreak());
     }
 
     public User updateUser(String token, User updatedUser, MultipartFile avatar) {
@@ -91,7 +99,7 @@ public class UserService {
 
         userRepository.save(existingUser);
         String newToken = jwtUtil.generateToken(existingUser.getUsername(), existingUser.getId());
-        return new User(newToken, existingUser.getUsername(), existingUser.getEmail(), existingUser.getAvatar_url());
+        return new User(newToken, existingUser.getUsername(), existingUser.getEmail(), existingUser.getAvatar_url(), existingUser.getLoginStreak());
     }
 
     // Contagem e resumo
@@ -223,6 +231,36 @@ public class UserService {
         } catch (Exception e) {
             throw new RuntimeException("Erro ao fazer upload do avatar: " + e.getMessage());
         }
+
+    }    
+    // Atualiza streak do usuário ao fazer login
+    public User processLogin(Long userId) {
+        User user = userRepository.findById(Math.toIntExact(userId))
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+        LocalDate today = LocalDate.now();
+        LocalDate lastLogin = user.getLastLoginDate();
+
+        if (lastLogin == null) {
+        // Primeiro login ou nunca registrado → inicia sequência
+        user.setLoginStreak(1);
+        } else {
+            long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(lastLogin, today);
+
+            if (daysBetween == 0) {
+            // Login no mesmo dia → sequência se mantém
+                } else if (daysBetween == 1) {
+            // Login consecutivo → +1
+                user.setLoginStreak(user.getLoginStreak() + 1);
+                } else {
+            // Perdeu 2+ dias → reinicia
+                user.setLoginStreak(1);
+            }
+        }
+
+        user.setLastLoginDate(today);
+        return userRepository.save(user);
     }
 
 }
+
