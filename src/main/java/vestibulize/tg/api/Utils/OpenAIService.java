@@ -33,38 +33,86 @@ public class OpenAIService {
     }
 
     public String gerarResumo(String texto) {
-        String prompt = "Resuma o seguinte texto de forma clara e objetiva: %s".formatted(texto);
-        String bodyJson = """
-        {
-          "model": "gpt-4o-mini",
-          "messages": [
-            {
-              "role": "user",
-              "content": "%s"
-            }
-          ],
-          "temperature": 0.6
-        }
-        """.formatted(prompt);
+
+        // ----------- PROMPT (idêntico ao seu, seguro) -----------
+        String prompt = """
+Você é um assistente especializado em analisar anotações de um caderno digital e gerar resumos claros, coerentes e objetivos.
+Seu papel é:
+
+1. Ler todas as anotações fornecidas.
+2. Unificar o conteúdo, removendo redundâncias e contradições.
+3. Identificar inconsistências, informações confusas ou trechos sem sentido.
+4. Produzir um resumo claro, objetivo e fiel ao que foi escrito.
+5. Não inventar informações externas.
+6. Retornar a resposta sempre no formato de texto corrido, em tópicos descrito abaixo.
+
+------------------------------------------
+IMPORTANTE – INSTRUÇÕES DE COMPORTAMENTO
+------------------------------------------
+
+• Nunca adicione informações que não estejam nas anotações.
+• Nunca preencha lacunas inventando detalhes.
+• Se algo estiver incompleto, confuso ou contraditório, informe isso explicitamente.
+• Mantenha tom neutro, profissional e didático.
+• Evite repetições e jargões desnecessários.
+• Priorize frases curtas, diretas e fáceis de entender.
+• Não tente interpretar além daquilo que os textos permitem.
+• Se houver interpretações possíveis, liste-as.
+• Não traga opiniões pessoais.
+
+------------------------------------------
+ESTILO DO TEXTO
+------------------------------------------
+
+• O resumo deve ser:
+  - extremamente objetivo
+  - claro
+  - coerente
+  - organizado
+  - em linguagem simples
+  - sem enrolação
+
+• Caso as anotações sejam muito longas, divida o resumo em tópicos.
+• Utilize texto corrido apenas quando fizer sentido para o contexto.
+
+------------------------------------------
+AGORA ANALISE AS ANOTAÇÕES DO USUÁRIO
+------------------------------------------
+
+A seguir estão as anotações que devem ser analisadas:
+
+%s
+
+Gere o resultado final seguindo todas as instruções acima, em texto corrido e em tópicos.
+""".formatted(texto);
+
+        // ----------- Body agora seguro e 100% válido -----------
+        Map<String, Object> requestBody = Map.of(
+            "model", "gpt-4o-mini",
+            "temperature", 0.6,
+            "messages", List.of(
+                Map.of(
+                    "role", "user",
+                    "content", prompt
+                )
+            )
+        );
 
         try {
             String response = webClient.post()
-                .header("Authorization", "Bearer " + apiKey)
-                .body(Mono.just(bodyJson), String.class)
+                .body(Mono.just(requestBody), Map.class)
                 .retrieve()
                 .bodyToMono(String.class)
-                .block(); // retorna String pura
+                .block();
 
             JsonNode raiz = objectMapper.readTree(response);
-            String resumo = raiz
+            return raiz
                 .get("choices")
                 .get(0)
                 .get("message")
                 .get("content")
                 .asText();
 
-            return resumo;
-        
         } catch (Exception e) {
             return "Erro ao chamar OpenAI: " + e.getMessage();
         }
