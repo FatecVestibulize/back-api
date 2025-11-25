@@ -20,6 +20,7 @@ public class Category {
     private Long id;
     private String name;
     private String color;
+    private String type;
     
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     @JsonIgnore
@@ -63,6 +64,14 @@ public class Category {
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public LocalDateTime getCreated_at() {
