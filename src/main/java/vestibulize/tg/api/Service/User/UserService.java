@@ -19,6 +19,9 @@ import vestibulize.tg.api.Service.Exam.ExamService;
 import vestibulize.tg.api.Service.Goal.GoalService;
 import vestibulize.tg.api.Service.Notebook.NotebookService;
 import vestibulize.tg.api.Utils.JwtUtil;
+import vestibulize.tg.api.Service.Storage.S3StorageService;
+
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class UserService {
@@ -45,6 +48,9 @@ public class UserService {
     @Autowired
     private ExamService examService;
 
+    @Autowired
+    private S3StorageService s3StorageService;
+
     public User createUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
@@ -57,10 +63,10 @@ public class UserService {
         }
 
         String token = jwtUtil.generateToken(userOptional.getEmail(), userOptional.getId());
-        return new User(token, userOptional.getUsername(), userOptional.getEmail());
+        return new User(token, userOptional.getUsername(), userOptional.getEmail(), userOptional.getAvatar_url());
     }
 
-    public User updateUser(String token, User updatedUser) {
+    public User updateUser(String token, User updatedUser, MultipartFile avatar) {
         Long userId = jwtUtil.extractId(token);
         User existingUser = userRepository.findById(Math.toIntExact(userId))
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
@@ -85,7 +91,7 @@ public class UserService {
 
         userRepository.save(existingUser);
         String newToken = jwtUtil.generateToken(existingUser.getUsername(), existingUser.getId());
-        return new User(newToken, existingUser.getUsername(), existingUser.getEmail());
+        return new User(newToken, existingUser.getUsername(), existingUser.getEmail(), existingUser.getAvatar_url());
     }
 
     // Contagem e resumo
@@ -204,4 +210,19 @@ public class UserService {
         return userRepository.findById(Math.toIntExact(userId))
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
     }
+
+    public User uploadAvatar(Long userId, MultipartFile file) {
+        try {
+            User user = userRepository.findById(Math.toIntExact(userId))
+                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+            user.setAvatar_url(s3StorageService.uploadFile(file, "users/" + userId + "/avatar"));
+            userRepository.save(user);
+            
+            return user;
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao fazer upload do avatar: " + e.getMessage());
+        }
+    }
+
 }

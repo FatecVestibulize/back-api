@@ -16,6 +16,9 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Transient;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.io.File;
+import org.springframework.web.multipart.MultipartFile;
+
 @Entity
 public class User {
 
@@ -30,6 +33,10 @@ public class User {
     private String email;
 
     private String password;
+    @Transient
+    private MultipartFile avatar;
+    @Column(name = "avatar_url")
+    private String avatar_url;
     private LocalDate birth_date;
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
@@ -76,10 +83,11 @@ public class User {
         this.birth_date = birth_date;
     }
 
-    public User(String token, String username, String email){
+    public User(String token, String username, String email, String avatar_url){
         this.token = token;
         this.username = username;
         this.email = email;
+        this.avatar_url = avatar_url;
     }
 
     // Getters e Setters
@@ -133,6 +141,12 @@ public class User {
 
     public List<PasswordRequest> getPasswordRequests() { return passwordRequests; }
     public void setPasswordRequests(List<PasswordRequest> passwordRequests) { this.passwordRequests = passwordRequests; }
+
+    public MultipartFile getAvatar() { return avatar; }
+    public void setAvatar(MultipartFile avatar) { this.avatar = avatar; }
+
+    public String getAvatar_url() { return avatar_url; }
+    public void setAvatar_url(String avatar_url) { this.avatar_url = avatar_url; }
 
     @PrePersist
     protected void onCreate() {

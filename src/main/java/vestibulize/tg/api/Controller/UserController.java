@@ -2,12 +2,13 @@ package vestibulize.tg.api.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
 import java.util.Map;
 import vestibulize.tg.api.Entity.User;
-import vestibulize.tg.api.Entity.PasswordRequest;
 import vestibulize.tg.api.Service.User.UserService;
 import vestibulize.tg.api.Utils.JwtUtil;
 import vestibulize.tg.api.Service.Password.PasswordService;
@@ -92,10 +93,12 @@ public class UserController {
 
     @PutMapping("/user/update")
     public ResponseEntity<?> updateUser(@RequestHeader("Authorization") String authHeader,
-                                        @RequestBody User updatedUser) {
+                                        @RequestBody User updatedUser,
+                                        @RequestParam(value = "avatar", required = false) MultipartFile avatar
+                                    ) {
         try {
             String token = authHeader.replace("Bearer ", "");
-            User user = userService.updateUser(token, updatedUser);
+            User user = userService.updateUser(token, updatedUser, avatar);
             return ResponseEntity.ok(user);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -235,7 +238,24 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
-    } 
+    }
+
+    @PostMapping(value = "/user/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadAvatar(
+            @RequestHeader(value = "token", required = true) String token,
+            @RequestParam("avatar") MultipartFile file) {
+        try {
+            Long user_id = jwtUtil.extractId(token);
+            User user = userService.uploadAvatar(user_id, file);
+            return ResponseEntity.ok(Map.of(
+                "message", "Avatar atualizado com sucesso",
+                "avatar_url", user.getAvatar_url()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", e.getMessage()));
+        }
+    }
 }
 
 
