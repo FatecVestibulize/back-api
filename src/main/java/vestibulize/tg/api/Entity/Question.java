@@ -33,11 +33,7 @@ public class Question {
     private Long category_id;
     
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
-    @JsonIgnore
     private List<Answer> answers;
-    
-    @Transient
-    private ArrayList<Answer> answersTransient;
     
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
@@ -131,14 +127,6 @@ public class Question {
 
     public void setAnswers(List<Answer> answers) {
         this.answers = answers;
-    }
-
-    public ArrayList<Answer> getAnswersTransient() {
-        return answersTransient;
-    }
-
-    public void setAnswersTransient(ArrayList<Answer> answersTransient) {
-        this.answersTransient = answersTransient;
     }
 
     @PrePersist
