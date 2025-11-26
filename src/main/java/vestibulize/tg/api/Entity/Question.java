@@ -27,7 +27,6 @@ public class Question {
     
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false, insertable = false, updatable = false)
-    @JsonIgnore
     private Category category;
     
     private Long category_id;

@@ -26,21 +26,18 @@ public class AnswerQuizQuestion {
     
     @ManyToOne
     @JoinColumn(name = "quiz_id", nullable = false, insertable = false, updatable = false)
-    @JsonIgnore
     private Quiz quiz;
     
     private Long quiz_id;
     
     @ManyToOne
     @JoinColumn(name = "question_id", nullable = false, insertable = false, updatable = false)
-    @JsonIgnore
     private Question question;
     
     private Long question_id;
     
     @ManyToOne
     @JoinColumn(name = "answer_id", insertable = false, updatable = false)
-    @JsonIgnore
     private Answer answer;
     
     private Long answer_id;
