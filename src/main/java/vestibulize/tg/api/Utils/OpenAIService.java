@@ -17,17 +17,28 @@ import java.util.Map;
 @Service
 public class OpenAIService {
 
-    Dotenv dotenv = Dotenv.load();
-    private String apiKey = dotenv.get("OPENAI_API_KEY");
-
     private WebClient webClient;
-
     private final ObjectMapper objectMapper = new ObjectMapper();
     
     public OpenAIService() {
+        String apiKey = null;
+        try {
+            Dotenv dotenv = Dotenv.configure()
+                .directory("./")
+                .filename(".env")
+                .ignoreIfMissing()
+                .load();
+            apiKey = dotenv.get("OPENAI_API_KEY");
+        } catch (Exception e) {
+        }
+        
+        if (apiKey == null || apiKey.isEmpty()) {
+            apiKey = System.getProperty("OPENAI_API_KEY", System.getenv("OPENAI_API_KEY"));
+        }
+        
         this.webClient = WebClient.builder()
                 .baseUrl("https://api.openai.com/v1/chat/completions")
-                .defaultHeader("Authorization", "Bearer " + System.getProperty("OPENAI_API_KEY", System.getenv("OPENAI_API_KEY")))
+                .defaultHeader("Authorization", "Bearer " + apiKey)
                 .defaultHeader("Content-Type", "application/json")
                 .build();
     }

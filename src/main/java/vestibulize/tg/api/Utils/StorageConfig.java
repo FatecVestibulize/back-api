@@ -13,20 +13,47 @@ import io.github.cdimascio.dotenv.Dotenv;
 @Configuration
 public class StorageConfig {
 
-    Dotenv dotenv = Dotenv.load();
-
-    private String awsAccessKeyId = dotenv.get("AWS_ACCESS_KEY_ID");
-    private String awsSecretKey = dotenv.get("AWS_SECRET_KEY");
-    private String awsSessionToken = dotenv.get("AWS_SESSION_TOKEN");
-    private String awsRegion = dotenv.get("AWS_REGION");
-
     @Bean
     public AmazonS3 amazonS3() {
+        String awsAccessKeyId = null;
+        String awsSecretKey = null;
+        String awsSessionToken = null;
+        String awsRegion = null;
+        
+        try {
+            Dotenv dotenv = Dotenv.configure()
+                .directory("./")
+                .filename(".env")
+                .ignoreIfMissing()
+                .load();
+            awsAccessKeyId = dotenv.get("AWS_ACCESS_KEY_ID");
+            awsSecretKey = dotenv.get("AWS_SECRET_KEY");
+            awsSessionToken = dotenv.get("AWS_SESSION_TOKEN");
+            awsRegion = dotenv.get("AWS_REGION");
+        } catch (Exception e) {
+            System.out.println("⚠️  Arquivo .env não encontrado. Usando variáveis de ambiente do sistema.");
+        }
+        
+        if (awsAccessKeyId == null || awsAccessKeyId.isEmpty()) {
+            awsAccessKeyId = System.getenv("AWS_ACCESS_KEY_ID");
+        }
+        if (awsSecretKey == null || awsSecretKey.isEmpty()) {
+            awsSecretKey = System.getenv("AWS_SECRET_KEY");
+        }
+        if (awsSessionToken == null || awsSessionToken.isEmpty()) {
+            awsSessionToken = System.getenv("AWS_SESSION_TOKEN");
+        }
+        if (awsRegion == null || awsRegion.isEmpty()) {
+            awsRegion = System.getenv("AWS_REGION");
+            if (awsRegion == null || awsRegion.isEmpty()) {
+                awsRegion = "us-east-1"; // Default
+            }
+        }
        
         if (awsAccessKeyId == null || awsSecretKey == null || awsAccessKeyId.isEmpty() || awsSecretKey.isEmpty()) {
             throw new IllegalStateException(
-                "AWS credentials not configured. Please set aws.access.key.id and aws.secret.key " +
-                "in application.properties or as environment variables"
+                "AWS credentials not configured. Please set AWS_ACCESS_KEY_ID and AWS_SECRET_KEY " +
+                "as environment variables"
             );
         }
         

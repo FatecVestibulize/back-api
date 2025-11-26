@@ -17,13 +17,26 @@ import java.util.UUID;
 public class S3StorageService {
 
     private final AmazonS3 amazonS3;
-    
-    Dotenv dotenv = Dotenv.load();
-
-    private String bucketName = dotenv.get("AWS_S3_BUCKET");
+    private String bucketName;
 
     public S3StorageService(AmazonS3 amazonS3) {
         this.amazonS3 = amazonS3;
+        
+        try {
+            Dotenv dotenv = Dotenv.configure()
+                .directory("./")
+                .filename(".env")
+                .ignoreIfMissing()
+                .load();
+            bucketName = dotenv.get("AWS_S3_BUCKET");
+        } catch (Exception e) {
+            System.out.println("⚠️  Arquivo .env não encontrado para S3. Usando variáveis de ambiente do sistema.");
+        }
+        
+        if (bucketName == null || bucketName.isEmpty()) {
+            bucketName = System.getenv("AWS_S3_BUCKET");
+        }
+        
     }
 
     public String uploadFile(MultipartFile file) throws IOException {
