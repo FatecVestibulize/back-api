@@ -145,8 +145,8 @@ public class QuizService {
                 }    
             }
         }
-        DecimalFormat df = new DecimalFormat("0.00");
-        return df.format((Double) (totalCorrectAnswers / (primeirosRegistros.size() * 10) * 100));
+        Double score = (totalCorrectAnswers / (primeirosRegistros.size() * 10) * 100);
+        return String.format(java.util.Locale.US, "%.2f", score);
         
     }    
 
