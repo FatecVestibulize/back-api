@@ -71,7 +71,7 @@ public class UserService {
 
         String token = jwtUtil.generateToken(userOptional.getEmail(), userOptional.getId());
         processLogin(userOptional.getId());
-        return new User(token, userOptional.getUsername(), userOptional.getEmail(), userOptional.getAvatar_url(), userOptional.getLoginStreak());
+        return new User(token, userOptional.getUsername(), userOptional.getEmail(), userOptional.getAvatar_url(), userOptional.getLoginStreak(), userOptional.getAvatarColor(), userOptional.getId());
     }
 
     public User updateUser(String token, User updatedUser, MultipartFile avatar) {

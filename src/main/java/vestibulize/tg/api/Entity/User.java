@@ -93,6 +93,16 @@ public class User {
         this.loginStreak = loginStreak;
     }
 
+    public User(String token, String username, String email, String avatar_url, int loginStreak, String avatarColor, long id){
+        this.token = token;
+        this.username = username;
+        this.email = email;
+        this.avatar_url = avatar_url;
+        this.avatarColor = avatarColor;
+        this.loginStreak = loginStreak;
+        this.id = id;
+    }
+
     // Getters e Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

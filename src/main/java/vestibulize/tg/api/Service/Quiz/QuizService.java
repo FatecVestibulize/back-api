@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import vestibulize.tg.api.Repository.Quiz.QuizRepository;
 import vestibulize.tg.api.Entity.Quiz;
+
+import java.text.DecimalFormat;
 import java.util.List;
 import vestibulize.tg.api.Entity.AnswerQuizQuestion;
 import vestibulize.tg.api.Repository.AnswerQuizQuestion.AnswerQuizQuestionRepository;
@@ -118,5 +120,34 @@ public class QuizService {
 
         return answerQuizQuestions;
     }
+
+    public String calculateScore(Long user_id) {
+        
+        List<Quiz> quiz = quizRepository.listFinishedExams(user_id);
+        
+        List<Quiz> primeirosRegistros;
+
+        if (quiz.size() >= 10) {
+            primeirosRegistros = quiz.subList(0, 10);
+        } else if (quiz.size() == 0) {
+            return "0.0";
+        }{ 
+            primeirosRegistros = quiz.subList(0, quiz.size());
+        }
+        Double totalCorrectAnswers = 0.0;
+        for (Quiz q : primeirosRegistros) {
+            List<AnswerQuizQuestion> answerQuizQuestions = answerQuizQuestionRepository.listByQuizId(q.getId());
+            for (AnswerQuizQuestion answerQuizQuestion : answerQuizQuestions) {
+                answerQuizQuestion.setAnswer(answerRepository.findById(answerQuizQuestion.getAnswer_id()).orElse(new Answer()));
+
+                if(answerQuizQuestion.getAnswer().getIs_correct()) {
+                    totalCorrectAnswers++;
+                }    
+            }
+        }
+        DecimalFormat df = new DecimalFormat("0.00");
+        return df.format((Double) (totalCorrectAnswers / (primeirosRegistros.size() * 10) * 100));
+        
+    }    
 
 }

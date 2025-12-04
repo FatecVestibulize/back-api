@@ -12,6 +12,7 @@ import vestibulize.tg.api.Entity.User;
 import vestibulize.tg.api.Service.User.UserService;
 import vestibulize.tg.api.Utils.JwtUtil;
 import vestibulize.tg.api.Service.Password.PasswordService;
+import vestibulize.tg.api.Service.Quiz.QuizService;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -29,6 +30,9 @@ public class UserController {
 
     @Autowired
     private PasswordService passwordService;
+
+    @Autowired
+    private QuizService quizService;
 
     @PatchMapping("/user/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> payload) {
@@ -254,6 +258,17 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/user/{id}/quiz-score")
+    public ResponseEntity<?> getUserById(@PathVariable Long id,
+        @RequestHeader(value = "token", required = true) String token) {
+        try {
+            String score = quizService.calculateScore(id);
+            return ResponseEntity.ok(Map.of("quiz_score", score));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 }

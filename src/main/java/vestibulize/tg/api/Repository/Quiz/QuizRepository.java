@@ -12,4 +12,7 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
     @Query(value = "SELECT * FROM quiz WHERE user_id = ?1 ORDER BY id DESC", nativeQuery = true)
     List<Quiz> listByUserId(Long user_id);
 
+    @Query(value = "SELECT * FROM quiz WHERE user_id = ?1 AND finished_at IS NOT NULL and type = 'exam' ORDER BY id DESC", nativeQuery = true)
+    List<Quiz> listFinishedExams(Long user_id);
+
 }
